@@ -57,6 +57,7 @@ const res = await fetch(
 "https://jsonplaceholder.typicode.com/posts/" + params.slug
 ).then((res) => res.json());
 return (
+
 <div>
 My Post: {params.slug}
 <div>name: {res.title}</div>
@@ -87,6 +88,7 @@ const res = await fetch(
 ).then((res) => res.json());
 console.log("static " + res.title);
 return (
+
 <div>
 My Post: {params.slug}
 <div>name: {res.title}</div>
@@ -108,4 +110,70 @@ export const dynamicParams = true // true | false,
 true (default): Dynamic segments not included in generateStaticParams are generated on demand.
 false: Dynamic segments not included in generateStaticParams will return a 404.
 
-now, aprt from 2, others will return 404
+## now, aprt from 2, others will return 404
+
+#
+
+The below gives an error
+Failed to parse internal url because nodejs dont have idea of base url
+export default async function Page2() {
+const res = await fetch("http://localhost:3000/api/names", {
+method: "GET",
+}).then((response) => response.json());
+
+so instead of doing this, just use server functions and directly call DB etc
+
+import Image from "next/image";
+import styles from "./page.module.css";
+export default async function Home() {
+async function myAction() {
+"use server";
+console.log("Success");
+}
+return (
+
+<main className={styles.main}>
+<div className={styles.description}>
+<p>Get started by editing&nbsp;</p>
+</div>
+<form action={myAction}>
+<button type="submit">Add to Cart</button>
+</form>
+</main>
+);
+}
+This sends an API call to same URL and performs actions at server
+
+#
+
+Route handler - build time or server time request
+
+First of all, everything api call made in useEffect of any component is server side.
+
+The question is only about the direct fetch (earlier getServerSideProps).
+
+--
+
+THe following GET api gets called at build time only, not on request time
+export async function GET() {
+console.log("print /api/names"); //printed only during build
+return Response.json({ data: "success" });
+}
+
+Now, if we add dynamic functions like cookie, auth headers, or other ways mentioned previously
+import { cookies } from "next/headers";
+
+export async function GET() {
+const cookieStore = cookies();
+const theme = cookieStore.get("theme");
+console.log("print /api/names"); // called on every req, not on build
+return Response.json({ data: "success" });
+}
+
+Other methods such as POST eg:
+export async function POST() {
+console.log("print post /api/class");
+return Response.json({ data: "success" });
+}
+
+always called dynamically,, not on build
